@@ -1,0 +1,28 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="Sistema Bancário" />
+        <title>
+            {% block head_title %}Sistema Bancário{% endblock %}
+        </title>
+        <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+        {% block head_extra %}{% endblock %}
+    </head>
+    <body class="bg-gray-100">
+        {% block body %}
+            {% include 'core/navbar.html' %}
+            <div class="lg:container lg:mx-auto">
+                {% include 'core/messages.html' %}
+                {% block content %}
+                <!-- Add content here -->
+                {% endblock %}
+            </div>
+            <!-- Remova ou comente a linha abaixo se você não está mais usando o footer -->
+            {# {% include 'core/footer.html' %} #}
+        {% endblock %}
+        {% block footer_extra %}{% endblock %}
+    </body>
+</html>
