@@ -1,3 +1,5 @@
+# transactions/forms.py
+
 import datetime
 from django import forms
 from django.conf import settings
@@ -23,7 +25,7 @@ class TransactionForm(forms.ModelForm):
         self.instance.account = self.account
         self.instance.balance_after_transaction = self.account.balance
         return super().save()
-    
+
 
 class DepositForm(TransactionForm):
     def clean_amount(self):
@@ -32,7 +34,7 @@ class DepositForm(TransactionForm):
 
         if amount < min_deposit_amount:
             raise forms.ValidationError(
-                f'You need to deposit at least {min_deposit_amount} $'
+                f'Você precisa depositar pelo menos {min_deposit_amount} R$'
             )
 
         return amount
@@ -47,16 +49,17 @@ class WithdrawForm(TransactionForm):
 
         if amount < min_withdraw_amount:
             raise forms.ValidationError(
-                f'You can withdraw at least {min_withdraw_amount} $'
+                f'Você pode sacar pelo menos {min_withdraw_amount} R$'
             )
 
         if amount > balance:
             raise forms.ValidationError(
-                f'You have {balance} $ in your account. '
-                'You cannot withdraw more than your account balance'
+                f'Você tem {balance} R$ na sua conta. '
+                'Você não pode sacar mais do que o saldo da sua conta'
             )
 
         return amount
+
 
 class TransferForm(forms.Form):
     receiver_cpf = forms.CharField(max_length=11, label="CPF do Recebedor")
@@ -85,6 +88,7 @@ class TransferForm(forms.Form):
 
         return cleaned_data
 
+
 class TransactionDateRangeForm(forms.Form):
     daterange = forms.CharField(required=False)
 
@@ -98,6 +102,6 @@ class TransactionDateRangeForm(forms.Form):
                     datetime.datetime.strptime(date, '%Y-%m-%d')
                 return daterange
             else:
-                raise forms.ValidationError("Please select a date range.")
+                raise forms.ValidationError("Por favor, selecione um intervalo de datas.")
         except (ValueError, AttributeError):
-            raise forms.ValidationError("Invalid date range")
+            raise forms.ValidationError("Intervalo de datas inválido")

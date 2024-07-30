@@ -35,12 +35,7 @@ class UserBankAccount(models.Model):
         max_digits=12,
         decimal_places=2
     )
-    interest_start_date = models.DateField(
-        null=True, blank=True,
-        help_text=(
-            'The month number that interest calculation will start from'
-        )
-    )
+
     initial_deposit_date = models.DateField(null=True, blank=True)
 
     def __str__(self):

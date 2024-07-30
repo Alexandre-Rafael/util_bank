@@ -1,3 +1,5 @@
+# transactions/views.py
+
 from django.contrib import messages
 from dateutil.relativedelta import relativedelta
 from django.views.generic.edit import FormView
@@ -8,7 +10,6 @@ from django.views.generic import CreateView, ListView
 from transactions.constants import DEPOSIT, WITHDRAWAL, TRANSFER
 from transactions.forms import DepositForm, WithdrawForm, TransferForm, TransactionDateRangeForm
 from transactions.models import Transaction
-from django.shortcuts import get_object_or_404
 from accounts.models import UserBankAccount
 
 
@@ -46,9 +47,7 @@ class TransactionRepostView(LoginRequiredMixin, ListView):
         return context
 
 
-
 class TransactionCreateMixin(LoginRequiredMixin, CreateView):
-    template_name = 'transactions/transaction_form.html'
     model = Transaction
     title = ''
     success_url = reverse_lazy('transactions:transaction_report')
@@ -71,6 +70,7 @@ class TransactionCreateMixin(LoginRequiredMixin, CreateView):
 
 class DepositMoneyView(TransactionCreateMixin):
     form_class = DepositForm
+    template_name = 'transactions/deposit_form.html'
     title = 'Depositar Dinheiro na Sua Conta'
 
     def get_initial(self):
@@ -84,10 +84,9 @@ class DepositMoneyView(TransactionCreateMixin):
         if not account.initial_deposit_date:
             now = timezone.now()
             account.initial_deposit_date = now
-            account.interest_start_date = now + relativedelta(months=+1)
 
         account.balance += amount
-        account.save(update_fields=['initial_deposit_date', 'balance', 'interest_start_date'])
+        account.save(update_fields=['initial_deposit_date', 'balance'])
 
         messages.success(
             self.request,
@@ -96,8 +95,10 @@ class DepositMoneyView(TransactionCreateMixin):
 
         return super().form_valid(form)
 
+
 class WithdrawMoneyView(TransactionCreateMixin):
     form_class = WithdrawForm
+    template_name = 'transactions/withdraw_form.html'
     title = 'Sacar Dinheiro da Sua Conta'
 
     def get_initial(self):
@@ -121,6 +122,7 @@ class WithdrawMoneyView(TransactionCreateMixin):
         )
 
         return super().form_valid(form)
+
 
 class TransferMoneyView(FormView):
     form_class = TransferForm
