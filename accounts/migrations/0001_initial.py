@@ -1,10 +1,5 @@
-
-import accounts.managers
-import django.db.models.deletion
-import django.utils.timezone
-from django.conf import settings
 from django.db import migrations, models
-
+import accounts.managers
 
 class Migration(migrations.Migration):
 
@@ -16,40 +11,36 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='User',
+            name='Usuario',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('password', models.CharField(max_length=128, verbose_name='password')),
-                ('last_login', models.DateTimeField(blank=True, null=True, verbose_name='last login')),
-                ('is_superuser', models.BooleanField(default=False, help_text='Designates that this user has all permissions without explicitly assigning them.', verbose_name='superuser status')),
-                ('first_name', models.CharField(blank=True, max_length=150, verbose_name='first name')),
-                ('last_name', models.CharField(blank=True, max_length=150, verbose_name='last name')),
-                ('is_staff', models.BooleanField(default=False, help_text='Designates whether the user can log into this admin site.', verbose_name='staff status')),
-                ('is_active', models.BooleanField(default=True, help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.', verbose_name='active')),
-                ('date_joined', models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined')),
+                ('senha', models.CharField(max_length=128, verbose_name='password')),
+                ('ultimo_login', models.DateTimeField(blank=True, null=True, verbose_name='last login')),
+                ('eh_superusuario', models.BooleanField(default=False, help_text='Designates that this user has all permissions without explicitly assigning them.', verbose_name='superuser status')),
+                ('primeiro_nome', models.CharField(blank=True, max_length=150, verbose_name='first name')),
+                ('ultimo_nome', models.CharField(blank=True, max_length=150, verbose_name='last name')),
                 ('email', models.EmailField(max_length=254, unique=True)),
-                ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.group', verbose_name='groups')),
-                ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.permission', verbose_name='user permissions')),
+                ('grupos', models.ManyToManyField(blank=True, related_name='user_set', related_query_name='user', to='auth.Group', verbose_name='groups')),
+                ('permissoes_usuarios', models.ManyToManyField(blank=True, related_name='user_set', related_query_name='user', to='auth.Permission', verbose_name='user permissions')),
             ],
             options={
-                'verbose_name': 'user',
-                'verbose_name_plural': 'users',
-                'abstract': False,
+                'verbose_name': 'usuario',
+                'verbose_name_plural': 'usuarios',
             },
             managers=[
-                ('objects', accounts.managers.UserManager()),
+                ('objetos', accounts.managers.GerenciadorUsuarios()),
             ],
         ),
         migrations.CreateModel(
-            name='UserBankAccount',
+            name='ContaBancariaUsuario',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('account_no', models.PositiveIntegerField(unique=True)),
-                ('gender', models.CharField(choices=[('M', 'Male'), ('F', 'Female')], max_length=1)),
-                ('birth_date', models.DateField(blank=True, null=True)),
-                ('balance', models.DecimalField(decimal_places=2, default=0, max_digits=12)),
-                ('initial_deposit_date', models.DateField(blank=True, null=True)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='account', to=settings.AUTH_USER_MODEL)),
+                ('numero_conta', models.PositiveIntegerField(unique=True)),
+                ('genero', models.CharField(choices=[('M', 'Masculino'), ('F', 'Feminino')], max_length=1)),
+                ('data_nascimento', models.DateField(blank=True, null=True)),
+                ('saldo', models.DecimalField(decimal_places=2, default=0, max_digits=12)),
+                ('data_deposito_inicial', models.DateField(blank=True, null=True)),
+                ('usuario', models.OneToOneField(on_delete=models.CASCADE, related_name='conta', to='accounts.Usuario')),
             ],
         ),
     ]

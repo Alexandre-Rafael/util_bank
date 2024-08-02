@@ -14,6 +14,8 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -54,12 +56,13 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',  # Middleware de mensagens
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'util_bank.urls'
-AUTH_USER_MODEL = 'accounts.User'
+AUTH_USER_MODEL = 'accounts.Usuario'
 
 TEMPLATES = [
     {
@@ -130,4 +133,4 @@ MINIMUM_DEPOSIT_AMOUNT = 10
 MINIMUM_WITHDRAWAL_AMOUNT = 10
 
 # Login redirect
-LOGIN_REDIRECT_URL = '/transactions/deposit/'
+LOGIN_REDIRECT_URL = '/transacoes/deposito/'

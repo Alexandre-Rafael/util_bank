@@ -1,7 +1,8 @@
-MALE = 'M'
-FEMALE = 'F'
+# Versão alterada
+MASCULINO = 'M'
+FEMININO = 'F'
 
-GENDER_CHOICE = (
-    (MALE, "Masculino"),
-    (FEMALE, "Feminino"),
+OPCOES_GENERO = (
+    (MASCULINO, "Masculino"),
+    (FEMININO, "Feminino"),
 )

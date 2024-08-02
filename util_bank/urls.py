@@ -1,12 +1,11 @@
 from django.contrib import admin
 from django.urls import include, path
 
-from core.views import HomeView
+from core.views import VisualizacaoInicio
 
 urlpatterns = [
-    path('', HomeView.as_view(), name='home'),
-    path('accounts/', include('accounts.urls', namespace='accounts')),
+    path('', VisualizacaoInicio.as_view(), name='inicio'),
+    path('contas/', include('accounts.urls', namespace='contas')),
     path('admin/', admin.site.urls),
-    path('transactions/', include('transactions.urls', namespace='transactions')),  # Verifique o namespace
+    path('transacoes/', include('transactions.urls', namespace='transactions')),
 ]
-

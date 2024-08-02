@@ -47,6 +47,19 @@ body {
 
 }
 
+.saldo-container {
+    background-color: #148f4d;
+    color: white;
+    text-align: center;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    font-size: 1.25rem;
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+
 .navbar-menu {
     display: flex;
     flex-grow: 1;

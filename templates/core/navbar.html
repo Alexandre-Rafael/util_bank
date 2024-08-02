@@ -9,16 +9,14 @@
                 <a href="{% url 'transactions:withdraw_money' %}" class="navbar-item">Saque</a>
                 <a href="{% url 'transactions:transfer_money' %}" class="navbar-item">Transferência</a>
                 <a href="{% url 'transactions:transaction_report' %}" class="navbar-item">Relatório de Transações</a>
-
             </div>
             <div class="navbar-end">
-                <a href="{% url 'accounts:user_logout' %}" class="navbar-button">Sair</a>
+                <a href="{% url 'contas:logout_usuario' %}" class="navbar-button">Sair</a>
             </div>
         {% else %}
-            <div class="navbar-links"></div>
             <div class="navbar-end">
-                <a href="{% url 'accounts:user_login' %}" class="navbar-button">Entrar</a>
-                <a href="{% url 'accounts:user_registration' %}" class="navbar-button">Registrar</a>
+                <a href="{% url 'contas:login_usuario' %}" class="navbar-button">Entrar</a>
+                <a href="{% url 'contas:registro_usuario' %}" class="navbar-button">Registrar</a>
             </div>
         {% endif %}
     </div>

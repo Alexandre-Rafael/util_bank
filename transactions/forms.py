@@ -1,106 +1,103 @@
-# transactions/forms.py
-
 import datetime
 from django import forms
 from django.conf import settings
-from .models import Transaction
-from accounts.models import UserBankAccount
+from .models import Transacao
+from accounts.models import ContaBancariaUsuario
 
-class TransactionForm(forms.ModelForm):
+class FormularioTransacao(forms.ModelForm):
     class Meta:
-        model = Transaction
+        model = Transacao
         fields = [
-            'amount',
-            'transaction_type'
+            'quantia',
+            'tipo_transacao'
         ]
 
     def __init__(self, *args, **kwargs):
-        self.account = kwargs.pop('account')
+        self.conta = kwargs.pop('conta', None)
         super().__init__(*args, **kwargs)
 
-        self.fields['transaction_type'].disabled = True
-        self.fields['transaction_type'].widget = forms.HiddenInput()
+        if self.conta is not None:
+            self.fields['tipo_transacao'].initial = self.initial.get('tipo_transacao', None)
+            self.fields['tipo_transacao'].disabled = True
+            self.fields['tipo_transacao'].widget = forms.HiddenInput()
 
     def save(self, commit=True):
-        self.instance.account = self.account
-        self.instance.balance_after_transaction = self.account.balance
-        return super().save()
+        self.instance.conta = self.conta
+        self.instance.saldo_apos_transacao = self.conta.saldo
+        return super().save(commit=commit)
 
+class FormularioDeposito(FormularioTransacao):
+    def clean_quantia(self):
+        quantia_minima_deposito = settings.MINIMUM_DEPOSIT_AMOUNT
+        quantia = self.cleaned_data.get('quantia')
 
-class DepositForm(TransactionForm):
-    def clean_amount(self):
-        min_deposit_amount = settings.MINIMUM_DEPOSIT_AMOUNT
-        amount = self.cleaned_data.get('amount')
-
-        if amount < min_deposit_amount:
+        if quantia < quantia_minima_deposito:
             raise forms.ValidationError(
-                f'Você precisa depositar pelo menos {min_deposit_amount} R$'
+                f'Você precisa depositar pelo menos {quantia_minima_deposito} R$'
             )
 
-        return amount
+        return quantia
 
+class FormularioSaque(FormularioTransacao):
+    def clean_quantia(self):
+        quantia_minima_saque = settings.MINIMUM_WITHDRAWAL_AMOUNT
+        saldo = self.conta.saldo
 
-class WithdrawForm(TransactionForm):
-    def clean_amount(self):
-        min_withdraw_amount = settings.MINIMUM_WITHDRAWAL_AMOUNT
-        balance = self.account.balance
+        quantia = self.cleaned_data.get('quantia')
 
-        amount = self.cleaned_data.get('amount')
-
-        if amount < min_withdraw_amount:
+        if quantia < quantia_minima_saque:
             raise forms.ValidationError(
-                f'Você pode sacar pelo menos {min_withdraw_amount} R$'
+                f'Você pode sacar pelo menos {quantia_minima_saque} R$'
             )
 
-        if amount > balance:
+        if quantia > saldo:
             raise forms.ValidationError(
-                f'Você tem {balance} R$ na sua conta. '
+                f'Você tem {saldo} R$ na sua conta. '
                 'Você não pode sacar mais do que o saldo da sua conta'
             )
 
-        return amount
+        return quantia
 
-
-class TransferForm(forms.Form):
-    receiver_cpf = forms.CharField(max_length=11, label="CPF do Recebedor")
-    amount = forms.DecimalField(decimal_places=2, max_digits=12, label="Quantia")
+class FormularioTransferencia(forms.Form):
+    cpf_recebedor = forms.CharField(max_length=11, label="CPF do Recebedor")
+    quantia = forms.DecimalField(decimal_places=2, max_digits=12, label="Quantia")
 
     def __init__(self, *args, **kwargs):
-        self.account = kwargs.pop('account', None)
+        self.conta = kwargs.pop('conta', None)
         super().__init__(*args, **kwargs)
 
     def clean(self):
-        cleaned_data = super().clean()
-        amount = cleaned_data.get('amount')
-        receiver_cpf = cleaned_data.get('receiver_cpf')
+        dados_limpos = super().clean()
+        quantia = dados_limpos.get('quantia')
+        cpf_recebedor = dados_limpos.get('cpf_recebedor')
 
-        if self.account:
-            if amount and amount <= 0:
-                self.add_error('amount', 'A quantia deve ser positiva.')
-            if receiver_cpf and self.account.cpf == receiver_cpf:
-                self.add_error('receiver_cpf', 'Não é possível transferir para a mesma conta.')
+        if self.conta:
+            if quantia and quantia <= 0:
+                self.add_error('quantia', 'A quantia deve ser positiva.')
+            if cpf_recebedor and self.conta.usuario.cpf == cpf_recebedor:
+                self.add_error('cpf_recebedor', 'Não é possível transferir para a mesma conta.')
 
-        if receiver_cpf:
+        if cpf_recebedor:
             try:
-                UserBankAccount.objects.get(cpf=receiver_cpf)
-            except UserBankAccount.DoesNotExist:
-                self.add_error('receiver_cpf', 'A conta do recebedor não existe.')
+                # Usando usuario__cpf para buscar o CPF do usuário relacionado
+                conta_recebedora = ContaBancariaUsuario.objects.get(usuario__cpf=cpf_recebedor)
+            except ContaBancariaUsuario.DoesNotExist:
+                self.add_error('cpf_recebedor', 'A conta do recebedor não existe.')
 
-        return cleaned_data
+        return dados_limpos
 
+class FormularioIntervaloDatasTransacao(forms.Form):
+    intervalo_datas = forms.CharField(required=False)
 
-class TransactionDateRangeForm(forms.Form):
-    daterange = forms.CharField(required=False)
-
-    def clean_daterange(self):
-        daterange = self.cleaned_data.get("daterange")
+    def clean_intervalo_datas(self):
+        intervalo_datas = self.cleaned_data.get("intervalo_datas")
 
         try:
-            daterange = daterange.split(' - ')
-            if len(daterange) == 2:
-                for date in daterange:
+            intervalo_datas = intervalo_datas.split(' - ')
+            if len(intervalo_datas) == 2:
+                for date in intervalo_datas:
                     datetime.datetime.strptime(date, '%Y-%m-%d')
-                return daterange
+                return intervalo_datas
             else:
                 raise forms.ValidationError("Por favor, selecione um intervalo de datas.")
         except (ValueError, AttributeError):

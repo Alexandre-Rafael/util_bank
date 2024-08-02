@@ -24,7 +24,7 @@
             <label class="form-label" for="{{ field.id_for_label }}">
                 {{ field.label }}
             </label>
-            <input class="form-input" name="{{ field.name }}" id="{{ field.id_for_label }}" type="{{ field.widget_type }}">
+            {{ field }}
             {% if field.errors %}
                 {% for error in field.errors %}
                 <p class="form-error">{{ error }}</p>
